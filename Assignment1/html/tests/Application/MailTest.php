@@ -51,7 +51,7 @@ class MailTest extends TestCase {
     public function testGetAllMail() {
         $mail = new Mail($this->pdo);
         $mail->createMail("Alice", "Hello");
-        $mail->createMail("John", "World");
+        $mail->createMail("John", "World"); // added a second name test to ensure multiple records are returned for testing purposes 
         $results = $mail->getAllMail();
         $this->assertIsArray($results);
         $this->assertCount(2, $results);
