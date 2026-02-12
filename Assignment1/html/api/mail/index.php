@@ -1,4 +1,8 @@
 <?php
+// Sajad Mirpour 
+// February 11 2026
+// index.php
+// This file implements the API endpoints for managing mail items
 require '../../vendor/autoload.php';
 
 use Application\Mail;

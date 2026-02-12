@@ -1,4 +1,8 @@
 <?php
+// Sajad Mirpour 
+// February 11 2026
+// MailTest.php
+// This file contains unit tests for the Mail class using PHPUnit. 
 use PHPUnit\Framework\TestCase;
 use Application\Mail;
 

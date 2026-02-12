@@ -1,5 +1,8 @@
 <?php
-namespace Application;
+// Sajad Mirpour 
+// February 11 2026
+// Mail.php
+// This file implements the Mail class which provides methods to manage mail items in the database
 
 use PDO;
 
