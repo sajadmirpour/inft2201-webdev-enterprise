@@ -18,11 +18,24 @@ try {
 $mail = new Mail($pdo);
 $page = new Page();
 
+// List all mail
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $page->list($mail->getAllMail());
+    exit;  
+}
+// Create mail
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $json = file_get_contents("php://input");
     $data = json_decode($json, true);
-
-    $page->item($mail->createMail($data['subject'], $data['body']));
+    //input validation
+    if (!isset($data['subject']) || !isset($data['body'])) {
+        $page->badRequest();
+        exit;
+    }
+    // create mail and return id
+    $id = $mail->createMail($data['subject'], $data['body']);
+    http_response_code(201);
+    echo json_encode(["id" => $id]);
     exit;
 }
 
