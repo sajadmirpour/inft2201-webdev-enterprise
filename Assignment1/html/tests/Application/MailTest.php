@@ -28,4 +28,20 @@ class MailTest extends TestCase {
         $this->assertIsInt($id);
         $this->assertEquals(1, $id);
     }
+
+    public function testGetMail() {
+        $mail = new Mail($this->pdo);
+        $mail->createMail("Alice", "Hello world");
+        $result = $mail->getMail(1);
+        $this->assertIsArray($result);
+        $this->assertEquals("Alice", $result['subject']);
+        $this->assertEquals("Hello world", $result['body']);
+    }
+
+    public function testGetMailNotFound() {
+        $mail = new Mail($this->pdo);
+        $result = $mail->getMail(999);
+        $this->assertFalse($result);
+    }
+
 }
