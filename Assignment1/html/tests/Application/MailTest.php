@@ -44,4 +44,13 @@ class MailTest extends TestCase {
         $this->assertFalse($result);
     }
 
+    public function testGetAllMail() {
+        $mail = new Mail($this->pdo);
+        $mail->createMail("Alice", "Hello");
+        $mail->createMail("John", "World");
+        $results = $mail->getAllMail();
+        $this->assertIsArray($results);
+        $this->assertCount(2, $results);
+    }
+
 }
