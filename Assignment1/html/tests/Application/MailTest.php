@@ -53,4 +53,21 @@ class MailTest extends TestCase {
         $this->assertCount(2, $results);
     }
 
+    public function testUpdateMail() {
+        $mail = new Mail($this->pdo);
+        $mail->createMail("Alice", "Hello");
+        $updated = $mail->updateMail(1, "Updated subject", "Updated body");
+        $this->assertTrue($updated);
+
+        $result = $mail->getMail(1);
+        $this->assertEquals("Updated subject", $result['subject']);
+        $this->assertEquals("Updated body", $result['body']);
+    }
+
+    public function testUpdateMailNotFound() {
+        $mail = new Mail($this->pdo);
+        $updated = $mail->updateMail(999, "No", "No");
+        $this->assertFalse($updated);
+    }
+
 }
