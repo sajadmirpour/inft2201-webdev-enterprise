@@ -21,14 +21,14 @@ class MailTest extends TestCase {
             );
         ");
     }
-
+    // Create tests
     public function testCreateMail() {
         $mail = new Mail($this->pdo);
         $id = $mail->createMail("Alice", "Hello world");
         $this->assertIsInt($id);
         $this->assertEquals(1, $id);
     }
-
+    // Get tests
     public function testGetMail() {
         $mail = new Mail($this->pdo);
         $mail->createMail("Alice", "Hello world");
@@ -37,13 +37,13 @@ class MailTest extends TestCase {
         $this->assertEquals("Alice", $result['subject']);
         $this->assertEquals("Hello world", $result['body']);
     }
-
+    // Get not found test
     public function testGetMailNotFound() {
         $mail = new Mail($this->pdo);
         $result = $mail->getMail(999);
         $this->assertFalse($result);
     }
-
+    // Get all tests
     public function testGetAllMail() {
         $mail = new Mail($this->pdo);
         $mail->createMail("Alice", "Hello");
@@ -52,7 +52,7 @@ class MailTest extends TestCase {
         $this->assertIsArray($results);
         $this->assertCount(2, $results);
     }
-
+    // Update tests
     public function testUpdateMail() {
         $mail = new Mail($this->pdo);
         $mail->createMail("Alice", "Hello");
@@ -63,11 +63,27 @@ class MailTest extends TestCase {
         $this->assertEquals("Updated subject", $result['subject']);
         $this->assertEquals("Updated body", $result['body']);
     }
-
+    // Update not found test
     public function testUpdateMailNotFound() {
         $mail = new Mail($this->pdo);
         $updated = $mail->updateMail(999, "No", "No");
         $this->assertFalse($updated);
+    }
+    // Delete tests
+    public function testDeleteMail() {
+        $mail = new Mail($this->pdo);
+        $mail->createMail("Alice", "Hello");
+        $deleted = $mail->deleteMail(1);
+        $this->assertTrue($deleted);
+
+        $result = $mail->getMail(1);
+        $this->assertFalse($result);
+    }
+    // Delete not found test
+    public function testDeleteMailNotFound() {
+        $mail = new Mail($this->pdo);
+        $deleted = $mail->deleteMail(999);
+        $this->assertFalse($deleted);
     }
 
 }
