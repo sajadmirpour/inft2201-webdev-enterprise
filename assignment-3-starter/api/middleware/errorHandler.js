@@ -2,22 +2,28 @@
 // This should be the LAST app.use(...) in server.js.
 
 module.exports = function errorHandler(err, req, res, next) {
-  // TODO: Implement centralized error handling.
-  // Requirements:
-  // - Do NOT leak stack traces or internal details to the client.
-  // - Always return a consistent JSON structure, e.g.:
-  //   { error, message, statusCode, requestId, timestamp }
-  // - Use correct HTTP status codes based on the type of error
-  //   (you can attach a statusCode on your custom error objects).
-  // - Include req.requestId in the response if available.
+  const statusCode = err.statusCode || 500;
+  const errorType = err.errorType || "InternalServerError";
+  const requestId = req.requestId || null;
+  const safeMessage =
+    statusCode === 500
+      ? "An unexpected error occurred." : err.message || "An unexpected error occurred.";
 
-  console.error("Unhandled error for request", req.requestId, err);
+  console.error(`Unhandled error for request ${requestId}:`, err.message);
 
-  res.status(500).json({
-    error: "InternalServerError",
-    message: "An unexpected error occurred.",
-    statusCode: 500,
-    requestId: req.requestId || null,
-    timestamp: new Date().toISOString()
+  // Add Retry-After header for rate limiting
+  if (statusCode === 429 && err.retryAfterSeconds) {
+    res.set("Retry-After", String(err.retryAfterSeconds));
+  }
+
+  res.status(statusCode).json({
+    error: errorType,
+    message: safeMessage,
+    statusCode: statusCode,
+    requestId: requestId,
+    timestamp: new Date().toISOString(),
+    ...(statusCode === 429 && err.retryAfterSeconds
+      ? { retryAfter: err.retryAfterSeconds }
+      : {})
   });
 };

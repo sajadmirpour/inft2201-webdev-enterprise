@@ -12,8 +12,10 @@ function loadMail(req, res, next) {
   const mail = mailData.find(m => m.id === id);
 
   if (!mail) {
-    // TODO: create a "not found" error object and pass to next(err)
-    return next(new Error("Mail not found (placeholder error, customize me)"));
+    const error = new Error("Mail not found");
+    error.statusCode = 404;
+    error.errorType = "NotFound";
+    return next(error);
   }
 
   req.mail = mail;
@@ -29,7 +31,6 @@ router.get("/:id",
   loadMail,
   authorize(canViewMail),
   (req, res) => {
-    // At this point, user is authenticated and authorized.
     res.json(req.mail);
   }
 );

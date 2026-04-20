@@ -1,5 +1,6 @@
 const express = require("express");
 const requestLogger = require("./middleware/requestLogger");
+const rateLimit = require("./middleware/rateLimit");
 const errorHandler = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/auth");
@@ -9,16 +10,17 @@ const statusRoutes = require("./routes/status");
 const app = express();
 
 app.use(express.json());
-
-// Attach request logger early so all requests get an ID and log entry.
 app.use(requestLogger);
+
+// Apply rate limiting 
+app.use(rateLimit);
 
 // Mount routes
 app.use("/status", statusRoutes);
 app.use("/auth", authRoutes);
 app.use("/mail", mailRoutes);
 
-// Centralized error handler LAST
+// Centralized error handler
 app.use(errorHandler);
 
 const PORT = 3000;

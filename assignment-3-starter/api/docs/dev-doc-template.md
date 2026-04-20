@@ -1,15 +1,12 @@
 # Assignment 3 – Developer Documentation
-
+Sajad Mirpour Assignment 3 Web enterprise documentation. All steps and schemas are as following below.
 ## 1. Overview
 
-Briefly describe what this API does and the main use case.
-
-- Example: “This API provides authenticated access to mail messages for a corporate mail system, with role-based access control, logging, rate limiting, and centralized error handling.”
-
----
+Provides authenticated access to mail messages using JWT authentication, RBAC, request logging with unique request IDs, rate limiting, and centralized error handling.
+The main use case is allowing users to securely access mail data while enforcing permissions and protecting the API from over population.
 
 ## 2. Authentication
-
+Tokens are valid for 1 hour and must be included in all protected routes using the Authorization header.
 ### 2.1 Auth Method
 
 - Scheme: Bearer token (JWT)
@@ -60,7 +57,9 @@ You can include a simple matrix:
 ---
 
 ## 4. Endpoints
-
+**Notes:**
+Missing fields results in 400 BadRequest
+Invalid credentials results in 401 Unauthorized
 ### 4.1 `POST /auth/login`
 
 **Description:**  
@@ -154,52 +153,64 @@ Simple health check to confirm the API is running.
 ---
 
 ## 5. Rate Limiting
+Keyed by: IP address (req.ip)
+Limit: RATE_LIMIT_MAX requests per RATE_LIMIT_WINDOW_SECONDS
+Applies globally to all routes
 
-Describe how rate limiting works in your implementation.
-
-* Keyed by: (IP address) or (userId from token).
-* Limit: e.g. `RATE_LIMIT_MAX` requests per `RATE_LIMIT_WINDOW_SECONDS`.
-* What happens when the limit is exceeded:
-
-  * Example response:
-
-    ```json
-    {
-      "error": "TooManyRequests",
-      "message": "Rate limit exceeded. Please try again later.",
-      "statusCode": 429,
-      "requestId": "req-67890",
-      "timestamp": "2025-11-30T14:30:00Z"
-    }
-    ```
-
-You can also mention if you set a `Retry-After` header or include a field in the JSON.
-
----
-
+When exceeded:
+Returns 429 TooManyRequests
+Includes Retry After header
 ## 6. Error Response Format
 
 Briefly describe the standard error JSON returned by your centralized error handler.
 
 Example:
 
-```json
 {
-  "error": "Forbidden",
-  "message": "User does not have permission to access this resource.",
-  "statusCode": 403,
-  "requestId": "req-abc123",
-  "timestamp": "2025-11-30T14:35:00Z"
+  "error": "TooManyRequests",
+  "message": "Rate limit exceeded. Please try again later.",
+  "statusCode": 429,
+  "requestId": "req-67890",
+  "timestamp": "2026-04-20T14:30:00Z"
 }
-```
 
 List a few common error categories you use (`BadRequest`, `Unauthorized`, `Forbidden`, `NotFound`, `TooManyRequests`, `InternalServerError`, etc.).
 
 ---
 
+Common error categories:
+BadRequest (400)
+Unauthorized (401)
+Forbidden (403)
+NotFound (404)
+TooManyRequests (429)
+InternalServerError (500)
+
 ## 7. Example Flows
 
-Provide at least one complete “happy path” and one “error path”:
+Step 1: Login
+
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"user1","password":"user123"}'
+
+Response:
+{
+  "token": "<jwt-token>"
+}
+
+Step 2: Access mail
+
+curl http://localhost:3000/mail/2 \
+  -H "Authorization: Bearer <jwt-token>"
+
+Response:
+{
+  "id": 2,
+  "userId": 2,
+  "subject": "Hello User1",
+  "body": "Your report is ready."
+}
 
 ### 7.1 Happy Path: Login + Access Own Mail
 
@@ -209,7 +220,27 @@ Provide at least one complete “happy path” and one “error path”:
 Include the exact curl commands and example responses.
 
 ### 7.2 Error Path: User Accessing Someone Else’s Mail
+Login as user1, then:
 
-1. Login as `user1`.
-2. `GET /mail/1` (which belongs to another user).
-3. Show the `403` response.
+curl http://localhost:3000/mail/1 \
+  -H "Authorization: Bearer <jwt-token>"
+
+Response:
+{
+  "error": "Forbidden",
+  "message": "User does not have permission to access this resource.",
+  "statusCode": 403,
+  "requestId": "req-12345",
+  "timestamp": "2026-04-20T14:22:00Z"
+}
+
+After exceeding the allowed requests:
+
+Response:
+{
+  "error": "TooManyRequests",
+  "message": "Rate limit exceeded. Please try again later.",
+  "statusCode": 429,
+  "requestId": "req-67890",
+  "timestamp": "2026-04-20T14:30:00Z"
+}

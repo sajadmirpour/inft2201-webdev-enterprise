@@ -3,10 +3,16 @@
 
 module.exports = function authorize(policy) {
   return (req, res, next) => {
-    // TODO: implement:
-    // - Read req.user and req.mail (or other resource, depending on route).
-    // - If policy(user, resource) === true, call next().
-    // - Otherwise, create an appropriate "Forbidden" error and pass to next(err).
-    next(new Error("authorize middleware not implemented yet"));
+    const user = req.user;
+    const resource = req.mail;
+
+    if (policy(user, resource)) {
+      return next();
+    }
+
+    const error = new Error("User does not have permission to access this resource.");
+    error.statusCode = 403;
+    error.errorType = "Forbidden";
+    next(error);
   };
 };
